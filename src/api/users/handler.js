@@ -22,7 +22,7 @@ class UsersHandler {
         data: {
           userId,
         },
-      });
+      }).code(201);
     } catch (error) {
       return error;
     }
@@ -33,12 +33,12 @@ class UsersHandler {
       const { id } = req.params;
       const user = await this._service.getUserById(id);
 
-      return h.response({
+      return {
         status: 'succees',
         data: {
           user,
         },
-      });
+      };
     } catch (error) {
       return error;
     }

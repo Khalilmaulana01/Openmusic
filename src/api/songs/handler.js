@@ -62,7 +62,7 @@ class SongsHandler {
         data: { songs },
       };
     } catch (error) {
-        return error;
+      return error;
     }
   }
 
