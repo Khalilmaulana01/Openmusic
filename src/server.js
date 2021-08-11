@@ -18,14 +18,13 @@ const init = async () => {
     },
   });
 
-
   //* extentions function untuk cycle server onPreResponse
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
 
-    const {response} = request;
+    const { response } = request;
 
-    if(response instanceof ClientError) {
+    if (response instanceof ClientError) {
       // membuat response baru dari response toolkit sesuai kebutuhan error handling
       const newResponse = h.response({
         status: 'fail',
@@ -33,13 +32,12 @@ const init = async () => {
       });
 
       newResponse.code(response.statusCode);
-      return newResponse
+      return newResponse;
     }
 
     // jika bukan ClientError, lanjutkan dengan response sebelumnya (tanpa terintervensi)
     return response.continue || response;
-  })
-
+  });
 
   //* registrasi plugin eksternal
   await server.register({
