@@ -6,6 +6,9 @@ class PlaylistsHandler {
     this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
     this.getPlaylistHandler = this.getPlaylistHandler.bind(this);
     this.deletePlaylistHandler = this.deletePlaylistHandler.bind(this);
+    this.postSongToPlaylistHandler = this.postSongToPlaylistHandler.bind(this);
+    this.getSongFromPlaylistHandler = this.getSongFromPlaylistHandler.bind(this);
+    this.deleteSongFromPlaylistHandler = this.deleteSongFromPlaylistHandler.bind(this);
   }
 
   async postPlaylistHandler(req, h) {
