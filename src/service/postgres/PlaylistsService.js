@@ -66,6 +66,51 @@ class PlaylistsService {
     }
   }
 
+  // Playlistsongs
+  async addSongToPlaylist(playlistId, songId) {
+    //! Verify songs exist
+
+    const id = `playlistsong-${nanoid(16)}`;
+
+    const query = {
+      text: 'INSERT INTO playlistsongs VALUES($1, $2, $3) RETURNING id',
+      values: [id, playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows[0].id) {
+      throw new InvariantError('Lagu gagal ditambahkan ke dalam playlist');
+    }
+
+    return result.rows[0].id;
+  }
+
+  async getSongsFromPlaylist(playlistId) {
+    const query = {
+      text: `SELECT songs.id, songs.title, songs.performer FROM songs
+      lEFT JOIN playlistsongs ON songs.id = playlistsongs.song_id
+      WHERE playlistsongs.playlist_id = $1`,
+      values: [playlistId],
+    };
+    const result = await this._pool.query(query);
+
+    return result.rows;
+  }
+
+  async deleteSongFromPlaylist(playlistId, songId) {
+    const query = {
+      text: 'DELETE FROM playlistsongs WHERE playlist_id = $1 AND song_id = $2 RETURNING Id',
+      values: [playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new InvariantError('Lagu gagal dihapus');
+    }
+  }
+
+  //! verify songs exits
   async verifyPlaylistOwner(playlistId, credentialId) {
     const query = {
       text: 'SELECT * FROM playlists where id = $1',
@@ -79,6 +124,24 @@ class PlaylistsService {
     const playlist = result.rows[0];
     if (playlist.owner !== credentialId) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
+    }
+  }
+
+  async verifyPlaylistAccess(playlistId, credentialId) {
+    try {
+      this.verifyPlaylistOwner(playlistId, credentialId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationService.verifyCollaborator(
+          playlistId,
+          credentialId,
+        );
+      } catch {
+        throw error;
+      }
     }
   }
 }
