@@ -27,11 +27,10 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlayLists(owner) {
-    //! DILIAT LAGI
+  async getPlaylists(owner) {
     const query = {
-      text: `SELECT playlists.id, playlists.name, users.username FROM
-      playlists LEFT JOIN users ON users.id = playlists.owner 
+      text: `SELECT playlists.id, playlists.name, users.username FROM playlists
+      LEFT JOIN users ON users.id = playlists.owner
       LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
       WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
@@ -40,21 +39,6 @@ class PlaylistsService {
     const result = await this._pool.query(query);
     return result.rows;
   }
-
-  // async getPlaylistById(id) {
-  //   const query = {
-  //     text: 'SELECT * FROM playlists WHERE id = $1',
-  //     values: [id],
-  //   };
-
-  //   const result = await this._pool.query(query);
-
-  //   if (!result.rowCount) {
-  //     throw new NotFoundError('Playlist tidak ditemukan');
-  //   }
-
-  //   return result.rows[0];
-  // }
 
   async deletePlaylistById(id) {
     const query = {
@@ -82,7 +66,6 @@ class PlaylistsService {
     if (!result.rowCount) {
       throw new InvariantError('Lagu gagal ditambahkan ke dalam playlist');
     }
-
   }
 
   async getSongsFromPlaylist(playlistId) {
@@ -110,15 +93,15 @@ class PlaylistsService {
     }
   }
 
-  //! verify songs exits
   async verifyPlaylistOwner(id, owner) {
     const query = {
       text: 'SELECT * FROM playlists where id = $1',
       values: [id],
     };
     const result = await this._pool.query(query);
+
     if (!result.rowCount) {
-      throw new NotFoundError('Playlists tidak ditemukan');
+      throw new NotFoundError('Playlist tidak ditemukan');
     }
 
     const playlist = result.rows[0];
@@ -130,7 +113,7 @@ class PlaylistsService {
 
   async verifyPlaylistAccess(playlistId, userId) {
     try {
-      this.verifyPlaylistOwner(playlistId, userId);
+      await this.verifyPlaylistOwner(playlistId, userId);
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;

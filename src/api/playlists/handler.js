@@ -45,6 +45,7 @@ class PlaylistsHandler {
         data: { playlists },
       };
     } catch (error) {
+      console.log(error);
       return error;
     }
   }
