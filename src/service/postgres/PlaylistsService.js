@@ -119,7 +119,7 @@ class PlaylistsService {
         throw error;
       }
       try {
-        await this._collaborationService.verifyCollaborator(
+        await this._collaborationsService.verifyCollaborator(
           playlistId,
           userId,
         );
