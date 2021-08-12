@@ -1,12 +1,13 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
-const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationsServices) {
     this._pool = new Pool();
+    this._collaborationsService = collaborationsServices;
   }
 
   async addPlaylist({ name, owner }) {
@@ -19,7 +20,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows[0].id) {
+    if (!result.rowCount) {
       throw new InvariantError('Playlist gagal ditambahkan');
     }
 
@@ -30,7 +31,8 @@ class PlaylistsService {
     //! DILIAT LAGI
     const query = {
       text: `SELECT playlists.id, playlists.name, users.username FROM
-      playlists INNER JOIN users ON collaborations.playlist_id = playlists.id
+      playlists LEFT JOIN users ON users.id = playlists.owner 
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
       WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
     };
@@ -39,28 +41,29 @@ class PlaylistsService {
     return result.rows;
   }
 
-  async getPlaylistById(id) {
+  // async getPlaylistById(id) {
+  //   const query = {
+  //     text: 'SELECT * FROM playlists WHERE id = $1',
+  //     values: [id],
+  //   };
+
+  //   const result = await this._pool.query(query);
+
+  //   if (!result.rowCount) {
+  //     throw new NotFoundError('Playlist tidak ditemukan');
+  //   }
+
+  //   return result.rows[0];
+  // }
+
+  async deletePlaylistById(id) {
     const query = {
-      text: 'SELECT * FROM playlists WHERE id = $1',
+      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
       values: [id],
     };
 
     const result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new NotFoundError('Playlist tidak ditemukan');
-    }
-
-    return result.rows[0];
-  }
-
-  async deletePlaylist(id) {
-    const query = {
-      text: 'DELETE FROM playlists WHERE id = $1',
-      values: [id],
-    };
-
-    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
     }
@@ -68,8 +71,6 @@ class PlaylistsService {
 
   // Playlistsongs
   async addSongToPlaylist(playlistId, songId) {
-    //! Verify songs exist
-
     const id = `playlistsong-${nanoid(16)}`;
 
     const query = {
@@ -78,11 +79,10 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows[0].id) {
+    if (!result.rowCount) {
       throw new InvariantError('Lagu gagal ditambahkan ke dalam playlist');
     }
 
-    return result.rows[0].id;
   }
 
   async getSongsFromPlaylist(playlistId) {
@@ -111,10 +111,10 @@ class PlaylistsService {
   }
 
   //! verify songs exits
-  async verifyPlaylistOwner(playlistId, credentialId) {
+  async verifyPlaylistOwner(id, owner) {
     const query = {
       text: 'SELECT * FROM playlists where id = $1',
-      values: [playlistId],
+      values: [id],
     };
     const result = await this._pool.query(query);
     if (!result.rowCount) {
@@ -122,14 +122,15 @@ class PlaylistsService {
     }
 
     const playlist = result.rows[0];
-    if (playlist.owner !== credentialId) {
+
+    if (playlist.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
   }
 
-  async verifyPlaylistAccess(playlistId, credentialId) {
+  async verifyPlaylistAccess(playlistId, userId) {
     try {
-      this.verifyPlaylistOwner(playlistId, credentialId);
+      this.verifyPlaylistOwner(playlistId, userId);
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -137,7 +138,7 @@ class PlaylistsService {
       try {
         await this._collaborationService.verifyCollaborator(
           playlistId,
-          credentialId,
+          userId,
         );
       } catch {
         throw error;

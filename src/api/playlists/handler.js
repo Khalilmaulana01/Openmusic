@@ -25,7 +25,7 @@ class PlaylistsHandler {
       });
       return h.response({
         status: 'success',
-        massage: 'Playlist berhasil ditambahkan',
+        message: 'Playlist berhasil ditambahkan',
         data: {
           playlistId,
         },
@@ -55,7 +55,7 @@ class PlaylistsHandler {
       const { id: credentialId } = req.auth.credentials;
 
       await this._service.verifyPlaylistOwner(playlistId, credentialId);
-      await this._service.deletePlaylist(credentialId);
+      await this._service.deletePlaylistById(playlistId);
 
       return {
         status: 'success',
@@ -115,7 +115,7 @@ class PlaylistsHandler {
 
       return {
         status: 'success',
-        message: 'Lagu berhasil dihapus dari playlsit',
+        message: 'Lagu berhasil dihapus dari playlist',
       };
     } catch (error) {
       return error;

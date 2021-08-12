@@ -50,6 +50,7 @@ class CollaborationsHandler {
         message: 'kolaborasi berhasil dihapus',
       };
     } catch (error) {
+      console.log(error);
       return error;
     }
   }
