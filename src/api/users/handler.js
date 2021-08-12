@@ -1,4 +1,4 @@
-// const ClientError = require('../../exceptions/ClientError');
+const { errorHandler } = require('../../utils/index');
 
 class UsersHandler {
   constructor(service, validator) {
@@ -7,11 +7,13 @@ class UsersHandler {
 
     this.postUserHandler = this.postUserHandler.bind(this);
     this.getUserByIdHandler = this.getUserByIdHandler.bind(this);
+    this.getUsersByUsernameHandler = this.getUsersByUsernameHandler.bind(this);
   }
 
   async postUserHandler(req, h) {
     try {
       this._validator.validateUserPayload(req.payload);
+
       const { username, password, fullname } = req.payload;
 
       const userId = await this._service.addUser({ username, password, fullname });
@@ -24,7 +26,7 @@ class UsersHandler {
         },
       }).code(201);
     } catch (error) {
-      return error;
+      return errorHandler(error, h);
     }
   }
 
@@ -40,7 +42,23 @@ class UsersHandler {
         },
       };
     } catch (error) {
-      return error;
+      return errorHandler(error, h);
+    }
+  }
+
+  async getUsersByUsernameHandler(req, h) {
+    try {
+      const { username } = req.query;
+
+      const users = await this._service.getUsersByUsername(username);
+      return {
+        status: 'success',
+        data: {
+          users,
+        },
+      };
+    } catch (error) {
+      return errorHandler(error, h);
     }
   }
 }

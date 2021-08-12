@@ -1,3 +1,5 @@
+const ClientError = require('../exceptions/ClientError');
+
 const mapDBToModel = ({
   id,
   title,
@@ -18,4 +20,21 @@ const mapDBToModel = ({
   updatedAt: updated_at,
 });
 
-module.exports = { mapDBToModel };
+const errorHandler = (error, h) => {
+  if (error instanceof ClientError) {
+    return h.response({
+      status: 'fail',
+      message: error.message,
+    }).code(error.statusCode);
+  }
+
+  const response = h.response({
+    status: 'error',
+    message: 'Maaf, terjadi kegagalan pada server kami.',
+  });
+  response.code(500);
+  console.error(error);
+  return response;
+};
+
+module.exports = { mapDBToModel, errorHandler };
