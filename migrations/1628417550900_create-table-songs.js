@@ -32,7 +32,7 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
-    updatedat: {
+    updated_at: {
       type: 'TEXT',
       notNull: true,
     },
