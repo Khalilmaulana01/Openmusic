@@ -5,7 +5,7 @@ class UploadsHandler {
     this._service = service;
     this._validator = validator;
 
-    this._postUploadImageHandler = this.postUploadImageHandler.bind(this);
+    this.postUploadImageHandler = this.postUploadImageHandler.bind(this);
   }
 
   async postUploadImageHandler(req, h) {

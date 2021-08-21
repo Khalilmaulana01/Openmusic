@@ -35,7 +35,7 @@ class AuthenticationsHandler {
     }
   }
 
-  async putAuthenticationHandler(req, h) {
+  async putAuthenticationHandler(req) {
     try {
       this._validator.validatePutAuthenticationPayload(req.payload);
 
@@ -56,7 +56,7 @@ class AuthenticationsHandler {
     }
   }
 
-  async deleteAuthenticationHandler(req, h) {
+  async deleteAuthenticationHandler(req) {
     try {
       this._validator.validateDeleteAuthenticationPayload(req.payload);
 
