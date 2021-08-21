@@ -4,7 +4,7 @@ class ExportsHandler {
     this._validator = validator;
     this._playlistsService = playlistsService;
 
-    this.postExportPlaylistsHandler = this._postExportPlaylistsHandler.bind(this);
+    this.postExportPlaylistsHandler = this.postExportPlaylistsHandler.bind(this);
   }
 
   async postExportPlaylistsHandler(req, h) {
