@@ -2,6 +2,7 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const Inert = require('@hapi/inert');
+const path = require('path');
 
 const ClientError = require('./exceptions/ClientError');
 
@@ -38,7 +39,7 @@ const ExportsValidator = require('./validator/exports');
 
 // uploads
 const uploads = require('./api/uploads');
-const StoragesService = require('./service/S3/StorageService');
+const StoragesService = require('./service/storage/StorageService');
 const UploadsValidator = require('./validator/uploads');
 
 // cache
@@ -54,7 +55,7 @@ const init = async () => {
     collaborationsService,
     cacheService,
   );
-  const storageService = new StoragesService();
+  const storageService = new StoragesService(path.resolve(__dirname, 'api/uploads/file/pictures'));
 
   const server = Hapi.server({
     port: process.env.PORT,
