@@ -13,4 +13,4 @@ const ImageHeadersSchema = Joi.object({
     .required(),
 }).unknown();
 
-module.exports = ImageHeadersSchema;
+module.exports = { ImageHeadersSchema };

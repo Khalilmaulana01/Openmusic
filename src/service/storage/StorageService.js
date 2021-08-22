@@ -1,10 +1,10 @@
 const fs = require('fs');
 
-class StoragesService {
+class StorageService {
   constructor(folder) {
     this._folder = folder;
 
-    if (!fs.existsSync) {
+    if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder, { recursive: true });
     }
   }
@@ -23,4 +23,4 @@ class StoragesService {
   }
 }
 
-module.exports = StoragesService;
+module.exports = StorageService;
